@@ -60,10 +60,11 @@ const FertilizationReport = () => {
   const [cropFilter, setCropFilter] = useState('all');
   const [searchCumul, setSearchCumul] = useState('');
 
-  const openHistory = (plotId: string, plotName: string) => {
+  const openHistory = (plotId: string, plotName: string, nutrient?: 'n' | 'p' | 'k') => {
     const qs = new URLSearchParams({ plot_name: plotName });
     if (filters.apiParams.date_from) qs.set('date_from', String(filters.apiParams.date_from));
     if (filters.apiParams.date_to) qs.set('date_to', String(filters.apiParams.date_to));
+    if (nutrient) qs.set('nutrient', nutrient);
     navigate(`/reports/history/fertilization/${plotId}?${qs.toString()}`);
   };
 
@@ -173,7 +174,7 @@ const FertilizationReport = () => {
     </select>
   );
 
-  const renderPivot = (title: string, rows: PlotMonthlyRow[]) => (
+  const renderPivot = (title: string, rows: PlotMonthlyRow[], nutrient: 'n' | 'p' | 'k') => (
     <div className="stat-card">
       <h3 className="text-[13px] font-semibold text-foreground mb-3 uppercase tracking-wider">
         {title}{' '}
@@ -197,7 +198,7 @@ const FertilizationReport = () => {
             ) : rows.map((row) => (
               <tr
                 key={row.plotId}
-                onClick={() => openHistory(row.plotId, row.plot)}
+                onClick={() => openHistory(row.plotId, row.plot, nutrient)}
                 title={t('reports.clickHistory', 'Click to view operations history')}
                 className="cursor-pointer"
               >
@@ -223,9 +224,9 @@ const FertilizationReport = () => {
         </div>
       )}
 
-      {renderPivot(t('reports.nitrogen', 'NITROGEN'), azoteRows)}
-      {renderPivot(t('reports.phosphorus', 'PHOSPHORUS'), phosphoreRows)}
-      {renderPivot(t('reports.potassium', 'POTASSIUM'), potassiumRows)}
+      {renderPivot(t('reports.nitrogen', 'NITROGEN'), azoteRows, 'n')}
+      {renderPivot(t('reports.phosphorus', 'PHOSPHORUS'), phosphoreRows, 'p')}
+      {renderPivot(t('reports.potassium', 'POTASSIUM'), potassiumRows, 'k')}
 
       <ReportTableCard
         title={t('reports.cumulativeNPK', 'Cumulative NPK per hectare')}

@@ -22,6 +22,9 @@ final class IndexFertilizationOperationRequest extends FormRequest
             'date_from'     => ['sometimes', 'date', 'date_format:Y-m-d'],
             'date_to'       => ['sometimes', 'date', 'date_format:Y-m-d', 'after_or_equal:date_from'],
             'per_page'      => ['sometimes', 'integer', 'min:1', 'max:100'],
+            // v4: drill-down from the per-nutrient pivot (N/P/K) should only
+            // list ops whose fertilizer actually contains that nutrient.
+            'nutrient'      => ['sometimes', 'in:n,p,k'],
         ];
     }
 }
