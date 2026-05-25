@@ -57,6 +57,8 @@ const OperationFormPage = ({ kind }: Props) => {
   const [targetPest, setTargetPest] = useState('');
   const [remarks, setRemarks] = useState('');
   const [harvestQty, setHarvestQty] = useState('');
+  const [harvestWorkerDays, setHarvestWorkerDays] = useState('');
+
 
   const buildPayload = (): Record<string, unknown> => {
     const base = { plot_id: plotId, operation_date: date };
@@ -84,10 +86,12 @@ const OperationFormPage = ({ kind }: Props) => {
         return {
           ...base,
           quantity_harvested: Number(harvestQty),
-          num_workers: 1,
+          // v4: single "Main d'œuvre (homme/jour)" input stored as N x 1.
+          num_workers: Math.max(1, Math.round(Number(harvestWorkerDays) || 1)),
           days_worked: 1,
         };
     }
+
 
   };
 
@@ -104,7 +108,9 @@ const OperationFormPage = ({ kind }: Props) => {
     if (kind === 'phytosanitary' && pestItems.every((i) => !i.pesticide_id || !i.quantity)) return t('form.invalid');
     if (kind === 'harvest') {
       if (!(Number(harvestQty) > 0)) return t('form.invalid');
+      if (!(Number(harvestWorkerDays) > 0)) return t('form.invalid');
     }
+
 
     return null;
   };
@@ -224,8 +230,10 @@ const OperationFormPage = ({ kind }: Props) => {
             {kind === 'harvest' && (
               <HarvestFields
                 quantity={harvestQty} onQuantityChange={setHarvestQty}
+                workerDays={harvestWorkerDays} onWorkerDaysChange={setHarvestWorkerDays}
               />
             )}
+
 
             {error && <p className="text-sm text-[hsl(var(--accent-danger))]">{error}</p>}
             {!online && <p className="text-xs text-muted-foreground">{t('common.networkError')}</p>}
