@@ -43,6 +43,19 @@ final class FertilizationOperationController extends Controller
         if (! empty($data['date_to'])) {
             $query->where('operation_date', '<=', $data['date_to']);
         }
+        if (! empty($data['nutrient'])) {
+            // Only ops whose fertilizer carries the requested nutrient.
+            // Uses the snapshot *_at_entry columns so historical rows whose
+            // fertilizer composition changed later still match correctly.
+            $col = match ($data['nutrient']) {
+                'n' => 'n_at_entry',
+                'p' => 'p_at_entry',
+                'k' => 'k_at_entry',
+            };
+            $query->where($col, '>', 0);
+        }
+
+
 
         return $this->paginatedResponse(
             $query->paginate($data['per_page'] ?? 25),

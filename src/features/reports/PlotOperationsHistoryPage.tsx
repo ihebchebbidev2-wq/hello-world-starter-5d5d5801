@@ -56,12 +56,15 @@ const PlotOperationsHistoryPage = () => {
   const dateFrom = params.get('date_from') ?? undefined;
   const dateTo = params.get('date_to') ?? undefined;
   const plotName = params.get('plot_name') ?? '';
+  // v4: when drilling down from the N/P/K fertilization pivot we restrict
+  // the listed entries to ops whose fertilizer contains that nutrient.
+  const nutrient = params.get('nutrient') ?? undefined;
 
   const validType = (type ?? '') as OpType;
   const isValid = !!ENDPOINT[validType] && !!plotId;
 
   const list = useQuery({
-    queryKey: ['plot-history-page', validType, plotId, dateFrom, dateTo],
+    queryKey: ['plot-history-page', validType, plotId, dateFrom, dateTo, nutrient],
     enabled: isValid,
     queryFn: async () => {
       const { data } = await api.get<{ data: OpRow[] }>(ENDPOINT[validType], {
@@ -69,6 +72,7 @@ const PlotOperationsHistoryPage = () => {
           plot_id: plotId,
           date_from: dateFrom,
           date_to: dateTo,
+          ...(validType === 'fertilization' && nutrient ? { nutrient } : {}),
           per_page: 100,
           sort: '-operation_date',
         },
