@@ -104,18 +104,17 @@ export function useReportFilters({
   // backend `array` validation rule. The singular alias is normalised back
   // to plot_ids[] by ReportRequest::prepareForValidation.
   //
-  // NOTE: when a campaign is selected we DO NOT send `campaign_id` to the API
-  // because operations created before the campaign foreign key was added do
-  // not carry one. Instead we rely entirely on the campaign's date interval
-  // (already merged into `range` above) — this makes the campaign filter
-  // work universally on `operation_date`.
+  // v4: we now ALSO send `campaign_id` so the backend can scope rows by
+  // campaign FK + date window (handles legacy ops without campaign_id).
   const apiParams = useMemo(() => {
     const p: Record<string, string | string[]> = {};
     if (plotId !== 'all') p.plot_id = plotId;
+    if (campaignId && campaignId !== CAMPAIGN_ALL) p.campaign_id = campaignId;
     if (range.from) p.date_from = range.from;
     if (range.to) p.date_to = range.to;
     return p;
-  }, [plotId, range.from, range.to]);
+  }, [plotId, campaignId, range.from, range.to]);
+
 
   return {
     plotId,

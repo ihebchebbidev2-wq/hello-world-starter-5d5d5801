@@ -78,8 +78,8 @@ const HarvestingReport = () => {
     filteredOps.map((r) => ({
       [t('table.date', 'Date')]: formatDateFr(r.operation_date),
       [t('table.plot', 'Plot')]: r.plot_name,
-      [t('table.workers', 'Workers')]: r.num_workers,
-      [t('table.harvested', 'Harvested')]: `${r.quantity_harvested} kg`,
+      "Main d'œuvre (homme/jour)": Math.round(r.num_workers * r.days_worked * 100) / 100,
+      'Quantité récoltée (kg)': r.quantity_harvested,
     })),
     'harvest-report',
   );
@@ -108,29 +108,33 @@ const HarvestingReport = () => {
             <tr>
               <th>{t('table.date', 'Date')}</th>
               <th>{t('table.plot', 'Plot')}</th>
-              <th>{t('table.workers', 'Workers')}</th>
-              <th>{t('table.harvested', 'Harvested')}</th>
+              <th>{t('table.workerDays', "Main d'œuvre (homme/jour)")}</th>
+              <th>{t('table.quantityHarvested', 'Quantité récoltée (kg)')}</th>
             </tr>
           </thead>
           <tbody>
             {pagination.pageRows.length === 0 ? (
               <tr><td colSpan={4} className="text-center py-8">{t('common.noData', 'No data')}</td></tr>
-            ) : pagination.pageRows.map((row) => (
-              <tr
-                key={row.id}
-                onClick={() => setEditId(row.id)}
-                title={t('reports.clickEdit', 'Click to edit')}
-                className="cursor-pointer"
-              >
-                <td className="font-medium text-foreground whitespace-nowrap">{formatDateFr(row.operation_date)}</td>
-                <td>{row.plot_name}</td>
-                <td>{row.num_workers}</td>
-                <td className="font-semibold text-foreground">{row.quantity_harvested.toLocaleString()} kg</td>
-              </tr>
-            ))}
+            ) : pagination.pageRows.map((row) => {
+              const workerDays = Math.round(row.num_workers * row.days_worked * 100) / 100;
+              return (
+                <tr
+                  key={row.id}
+                  onClick={() => setEditId(row.id)}
+                  title={t('reports.clickEdit', 'Click to edit')}
+                  className="cursor-pointer"
+                >
+                  <td className="font-medium text-foreground whitespace-nowrap">{formatDateFr(row.operation_date)}</td>
+                  <td>{row.plot_name}</td>
+                  <td>{workerDays}</td>
+                  <td className="font-semibold text-foreground">{row.quantity_harvested.toLocaleString()} kg</td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </ReportTableCard>
+
 
       <OperationDetailsModal
         open={!!editId}
